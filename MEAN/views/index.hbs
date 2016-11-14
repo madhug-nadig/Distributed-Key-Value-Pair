@@ -1,0 +1,35 @@
+<style>
+
+.ui{
+
+	width: 400px;
+	margin: 0px auto;
+	margin-top: 250px;
+
+}
+
+</style>
+
+
+<div class = "ui">
+	<form  method = "POST" action = "/get">
+	  <div class="form-group">
+	    <label for="email">Enter your get request to the server:</label>
+	    <input type="text" name = "getcommand" class="form-control" id="getcommand" placeholder="Enter the command">
+	  </div>
+	  <button type="submit" class="btn btn-default">GET</button>
+	</form>
+
+	    <br />
+
+	<form method = "POST" action = "/post">
+	  <div class="form-group" >
+	    <label for="email">Enter your post request to the server:</label>
+	    <input type="text" name = "postcommand" class="form-control" id="postcommand" placeholder="Enter the command">
+	    <br />
+
+	  </div>
+	  <button type="submit" class="btn btn-default">POST</button>
+	</form>
+	<h1>{{message}}</h1>
+</div>
