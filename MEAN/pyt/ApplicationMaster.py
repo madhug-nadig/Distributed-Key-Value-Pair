@@ -67,7 +67,7 @@ def main():
 	for id, ip_port in nodes.items():
 		socks[id] = context.socket(zmq.REQ)
 		socks[id].connect("tcp://" + ip_port[0] + ":" + ip_port[1])
-	ll = ""
+
 	if flag == "get":
 		command = sys.argv[2].strip()
 		#Pass the socket reference to the get job
@@ -82,13 +82,13 @@ def main():
 		try:
 			rg = get_job(command, socks[id])
 			got_from = str(id+1) #+1 because the node id starts from 0
-			data = socks[id].recv().decode('utf-8')
+			data = socks[id].recv().decode('utf-8') #receive data from the main node
 			
 		except:
 			try:
 				rg = get_job(command, socks[(id+1)%number_of_nodes])
 				got_from = str((id+1)%number_of_nodes+1) #+1 because the node id starts from 0
-				data = socks[(id+1)%number_of_nodes+1].recv().decode('utf-8')
+				data = socks[(id+1)%number_of_nodes+1].recv().decode('utf-8') #receive data from the replica node
 
 			except Exception as e:
 				print("ERR: " + str(e))
@@ -104,25 +104,25 @@ def main():
 		replica = (id+1) % number_of_nodes
 		
 		main_mode = str(id+1)		   #+1 because the node id starts from 0
-		replica_node = str(replica +1) #+1 because the node id starts from 0
+		replica_node = str(replica +1) #+1 because the node id starts from 0, replicating the data to the next node
 		
 		#Pass the socket reference to the post job
-		f = open('../metadata/loc.tsv', 'a')
+		f = open('../metadata/loc.tsv', 'a') #rowid to location mapping
 		f.write(str(command.split()[1]))
 		f.write('\t')
 		f.write(str(id))
 		f.write('\n')
 		f.close()
 		
-		f = open('../metadata/rep.tsv','a')
+		f = open('../metadata/rep.tsv','a') #having a replica location mapping, this is not really necessacary since the replica is always id+1 % num
 		f.write(str(command.split()[1]))
 		f.write('\t')
 		f.write(str(replica))
 		f.write('\n')
 		f.close()
 		
-		rp = post_job(command, socks[id])
-		rp2 = post_job(command, socks[replica])
+		rp = post_job(command, socks[id]) # Implement the post job in main Node
+		rp2 = post_job(command, socks[replica]) # Implement the post job in replica Node
 		
 		opdic.append({"message": rp , "status": "successful","main": main_mode, "replica": replica_node})
 	else:
