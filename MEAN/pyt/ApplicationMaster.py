@@ -7,19 +7,19 @@ import threading
 
 
 def get_job(command, s):
-	#poller = zmq.Poller()
-	#poller.register(s,zmq.POLLIN)
-	#socks = dict(poller.poll(5000))
+	poller = zmq.Poller()
+	poller.register(s,zmq.POLLIN)
+	socks = dict(poller.poll(5000))
 
 	data = "get;"
 	data = data + str(command)
-
-	#if socks:
-	#	if socks.get(s) == zmq.POLLIN:
-	#		s.send(data.encode('utf-8'), zmq.NOBLOCK)
-	#		
-	#	else:
-	#		raise IndexError
+	#Checking for node un-availablity
+	if socks:
+		if socks.get(s) == zmq.POLLIN:
+			s.send(data.encode('utf-8'), zmq.NOBLOCK)
+		
+		else:
+			raise IndexError
 	
 	s.send(data.encode('utf-8'))
 	return "\nThe client's get request : \nCommand: " + command
