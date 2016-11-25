@@ -7,21 +7,19 @@ import threading
 
 
 def get_job(command, s):
-	poller = zmq.Poller()
-	poller.register(s,zmq.POLLIN)
-	socks = dict(poller.poll(5000))
+	#poller = zmq.Poller()
+	#poller.register(s,zmq.POLLIN)
+	#socks = dict(poller.poll(5000))
 
 	data = "get;"
 	data = data + str(command)
-	#Checking for node un-availablity
-	if socks:
-		if socks.get(s) == zmq.POLLIN:
-			s.send(data.encode('utf-8'), zmq.NOBLOCK)
-		
-		else:
-			raise IndexError
 	
-	s.send(data.encode('utf-8'))
+	try:
+		s.send(data.encode('utf-8'), zmq.NOBLOCK)
+		print("AAA")
+	except Exception as e:
+		print(str(e))
+
 	return "\nThe client's get request : \nCommand: " + command
 
 def post_job(command, s):
@@ -32,21 +30,20 @@ def post_job(command, s):
 	return "\nThe client posted : \nCommand : " + command + "\n"
 
 def main():
+
 	opdic = []
+	print("aa")
 
 	flag = sys.argv[1].strip()
-	
+
 	# ZeroMQ Context For distributed Message amogst processes
 	context = zmq.Context()
 
 	# Define the socket using the "Context". Create a transport layer socket, for TCP based communucation with other processes
 
-	# sock = context.socket(zmq.REQ)
-	# sock.connect("tcp://127.0.0.1:5678")
-	# sock.connect("tcp://192.168.1.102:5678")
-
 	nodes={}
 	number_of_nodes = 0
+
 	f = open('../metadata/nodes.tsv', 'r')
 	for i in f.readlines():
 		number_of_nodes += 1
@@ -63,7 +60,6 @@ def main():
 	# Define the socket using the "Context". Create a transport layer socket, for TCP based communucation with other processes
 
 	socks = [None] * len(nodes)
-
 	for id, ip_port in nodes.items():
 		socks[id] = context.socket(zmq.REQ)
 		socks[id].connect("tcp://" + ip_port[0] + ":" + ip_port[1])
@@ -80,18 +76,23 @@ def main():
 		
 		
 		try:
-			rg = get_job(command, socks[id])
-			got_from = str(id+1) #+1 because the node id starts from 0
-			data = socks[id].recv().decode('utf-8') #receive data from the main node
+			if(socks[id]):
+				rg = get_job(command, socks[id])
+				time.sleep(5)
+				got_from = str(id+1) #+1 because the node id starts from 0
+				data = socks[id].recv().decode('utf-8') #receive data from the main node
 			
-		except:
-			try:
-				rg = get_job(command, socks[(id+1)%number_of_nodes])
-				got_from = str((id+1)%number_of_nodes+1) #+1 because the node id starts from 0
-				data = socks[(id+1)%number_of_nodes+1].recv().decode('utf-8') #receive data from the replica node
+			else:
+				try:
+					rg = get_job(command, socks[(id+1)%number_of_nodes])
+					got_from = str((id+1)%number_of_nodes+1) #+1 because the node id starts from 0
+					data = socks[(id+1)%number_of_nodes+1].recv().decode('utf-8') #receive data from the replica node
 
-			except Exception as e:
-				print("ERR: " + str(e))
+				except Exception as e:
+					print("ERR: " + str(e))
+		except:
+			print("ERR: " + str(e))
+
 		
 		if data != "Not Found":
 			opdic.append({"message": rg, "status": "successful", "value": data, "from": got_from})
@@ -111,13 +112,6 @@ def main():
 		f.write(str(command.split()[1]))
 		f.write('\t')
 		f.write(str(id))
-		f.write('\n')
-		f.close()
-		
-		f = open('../metadata/rep.tsv','a') #having a replica location mapping, this is not really necessacary since the replica is always id+1 % num
-		f.write(str(command.split()[1]))
-		f.write('\t')
-		f.write(str(replica))
 		f.write('\n')
 		f.close()
 		
