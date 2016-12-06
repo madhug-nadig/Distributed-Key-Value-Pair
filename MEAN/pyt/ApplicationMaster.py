@@ -3,20 +3,18 @@ import json
 import zmq
 import random
 import time
-import threading
+import _thread
 
 
 def get_job(command, s):
 	#poller = zmq.Poller()
 	#poller.register(s,zmq.POLLIN)
 	#socks = dict(poller.poll(5000))
-
 	data = "get;"
 	data = data + str(command)
 	
 	try:
 		s.send(data.encode('utf-8'), zmq.NOBLOCK)
-		print("AAA")
 	except Exception as e:
 		print(str(e))
 
@@ -32,7 +30,6 @@ def post_job(command, s):
 def main():
 
 	opdic = []
-	print("aa")
 
 	flag = sys.argv[1].strip()
 
@@ -60,6 +57,7 @@ def main():
 	# Define the socket using the "Context". Create a transport layer socket, for TCP based communucation with other processes
 
 	socks = [None] * len(nodes)
+	
 	for id, ip_port in nodes.items():
 		socks[id] = context.socket(zmq.REQ)
 		socks[id].connect("tcp://" + ip_port[0] + ":" + ip_port[1])
@@ -74,25 +72,24 @@ def main():
 				id = ll[1]
 		f.close()
 		
-		
+		mastr = False
 		try:
-			if(socks[id]):
-				rg = get_job(command, socks[id])
-				time.sleep(5)
-				got_from = str(id+1) #+1 because the node id starts from 0
-				data = socks[id].recv().decode('utf-8') #receive data from the main node
-			
-			else:
-				try:
+			rg = get_job(command, socks[id])
+			got_from = str(id+1) #+1 because the node id starts from 0
+			socks[id].setsockopt(zmq.RCVTIMEO, 1000)
+			socks[id].setsockopt(zmq.LINGER, 0)
+			data = socks[id].recv().decode('utf-8') #receive data from the main node	
+			mastr = True
+		except:
+			try:
 					rg = get_job(command, socks[(id+1)%number_of_nodes])
 					got_from = str((id+1)%number_of_nodes+1) #+1 because the node id starts from 0
-					data = socks[(id+1)%number_of_nodes+1].recv().decode('utf-8') #receive data from the replica node
 
-				except Exception as e:
-					print("ERR: " + str(e))
-		except:
-			print("ERR: " + str(e))
-
+			except Exception as e:
+				print("ERR: " + str(e))
+		
+		if(mastr == False):
+			data = socks[(id+1)%number_of_nodes+1].recv().decode('utf-8') #receive data from the replica node
 		
 		if data != "Not Found":
 			opdic.append({"message": rg, "status": "successful", "value": data, "from": got_from})
