@@ -61,13 +61,13 @@ while True:
 	if job_type == 'post':
 		command = dataarray[1]
 		command_array = command.split()
-		make_path(command_array, r'C:\Users\Nadig\Desktop\Big Data Project\Node Three\tables\\' + command_array[0])
+		make_path(command_array, r'tables\\' + command_array[0])
 
 	elif job_type == 'get':
 		command = dataarray[1]
 		command_array = command.split()
 		print("\nRecived: \nCommand: " + str(command))
-		res = search_for(command_array, r'C:\Users\Nadig\Desktop\Big Data Project\Node Three\tables\\' + command_array[0])
+		res = search_for(command_array, r'tables\\' + command_array[0])
 		sock.send(res.encode('utf-8'))
 		print(res)
 
