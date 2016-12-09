@@ -6,6 +6,7 @@ import time
 import _thread
 
 
+#this handled the get
 def get_job(command, s):
 	#poller = zmq.Poller()
 	#poller.register(s,zmq.POLLIN)
@@ -20,6 +21,7 @@ def get_job(command, s):
 
 	return "\nThe client's get request : \nCommand: " + command
 
+#this handles the post
 def post_job(command, s):
 	data = "post;"
 	data = data + str(command)
