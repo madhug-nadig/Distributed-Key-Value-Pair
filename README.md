@@ -5,5 +5,5 @@ A distributed key-value store with multiple nodes, node management, replica mana
 Support for GET and POST requests.
 
 ## Command Formats:
-**GET**: `<*tablename*> <*rowid*> <*column family*>:<*column>`
-**POST**: `<*tablename*> <*rowid*> <*column family*>:<*column> <value>`
+**GET**:  _`<tablename> <rowid> <column family>:<column>`_  
+**POST**: _`<tablename> <rowid> <column family>:<column> <value>`_
