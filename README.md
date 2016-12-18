@@ -17,3 +17,12 @@ Support for GET and POST requests.
 
 1. ZeroMQ - zmq library for python
 2. NodeJS child processes - through PythonShell
+
+## Architecture:  
+
+The architecture consists of 4 layers,
+
+1. Client - where the user enters the get/post commands
+2. Web Server - to handle client requests
+3. Application Master - node management, fault tolerance, replication management
+4. Node Manager - management of indivisual nodes
