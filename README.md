@@ -1,8 +1,8 @@
 # Distributed-Key-Value-Pair
 
-A demonstration of the implementation of a distributed columnary NoSQL implementation for big data.  
-A distributed key-value store with multiple nodes, node management, replica management and fault tolerance.  
-Support for GET and POST requests.
+A demonstration of the implementation of a distributed columnar NoSQL key-value pair based datastore for big data. With support for multiple nodes, node management, centralized control, replica management and fault tolerance. Implemented with GET(Query) and POST(entry) requests with persistent storage.  Architecture suitable for 'read once write consistently' type of applications.
+
+Built from scratch with Python and NodeJS.
 
 ## Command Format:  
 **GET**:  _`<tablename> <rowid> <column family>:<column>`_  
